@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e9eee5"><meta name="description" content="栖迟小镇，一座会生活的微缩世界。看居民散步，等一班小火车，让雨落下来。">
+  <title>栖迟小镇 · Slowhaven</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23e9eee5'/%3E%3Cpath d='M11 32 32 13l21 19v21H11Z' fill='%23bf7660'/%3E%3Cpath d='M8 32 32 10l24 22' fill='none' stroke='%233d6259' stroke-width='6'/%3E%3Cpath d='M28 36h10v17H28Z' fill='%23fbe3a1'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+</head>
+<body>
+  <div id="world" aria-label="可交互的三维微缩小镇"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 42 42"><path d="m5 23 16-14 16 14M10 20v15h22V20M18 35V24h7v11M6 35h30"/></svg></span><div><div class="eyebrow">A LITTLE WORLD, A SLOWER LIFE</div><h1>栖迟小镇<span>SLOWHAVEN</span></h1></div></div>
+    <div class="top-actions"><button class="icon-button" id="help-btn" aria-label="玩法说明" title="玩法说明"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 8.5a2.6 2.6 0 0 1 5 1c0 2-2.5 2-2.5 4M12 17h.01"/></svg></button><button class="icon-button" id="fullscreen-btn" aria-label="全屏" title="全屏"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button></div>
+  </header>
+  <section class="clock-card glass" aria-label="小镇时间">
+    <span id="clock-icon" class="clock-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></span>
+    <div><div class="clock-label">小镇时间 <span id="day-count">第 1 天</span></div><div class="clock-time"><span id="time-text">15:30</span><span id="time-name">午后漫游</span></div></div>
+    <button id="pause-btn" class="pause-button" aria-label="暂停小镇" title="暂停 / 继续"><svg viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg></button>
+  </section>
+  <aside class="scene-note" id="scene-note"><span class="tiny-line"></span><span id="scene-note-text">风吹过树梢，今天也不必着急。</span></aside>
+  <div class="orbit-hint" id="orbit-hint"><svg viewBox="0 0 24 24"><path d="M8 8V5a4 4 0 0 1 8 0v7M8 8l-1-1a2 2 0 0 0-3 2l3 8a6 6 0 0 0 6 4c5 0 7-4 7-7v-3a2 2 0 0 0-4 0M8 8v5"/></svg><span class="desktop-hint">拖动旋转 · 滚轮缩放 · 点击探索</span><span class="mobile-hint">单指旋转 · 双指缩放 · 轻点探索</span><button id="dismiss-hint" aria-label="关闭提示">×</button></div>
+  <section class="panel glass" id="control-panel" hidden aria-label="小镇设置">
+    <div class="panel-heading"><div><span class="eyebrow">MAKE YOUR MOMENT</span><h2 id="panel-title">光阴与天气</h2></div><button class="close-button" id="close-panel" aria-label="关闭面板">×</button></div>
+    <div id="atmosphere-panel">
+      <label class="control-label" for="time-range">把时间拨到喜欢的一刻 <span id="range-time">15:30</span></label><input id="time-range" type="range" min="0" max="1439" step="1" value="930" aria-label="小镇时间">
+      <div class="time-presets"><button data-hour="7">清晨</button><button data-hour="13">白昼</button><button data-hour="17.6">黄昏</button><button data-hour="22">夜晚</button></div>
+      <div class="control-label weather-label">窗外的天气</div><div class="weather-options"><button data-weather="sunny" class="selected"><span>☀</span>晴朗</button><button data-weather="rain"><span>☂</span>细雨</button><button data-weather="snow"><span>❄</span>飘雪</button></div>
+      <div class="speed-row"><span class="control-label">生活的步调</span><div class="segments" id="speed-options"><button data-speed="1" class="selected">悠闲</button><button data-speed="3">轻快</button></div></div>
+      <p class="panel-caption">白昼与黑夜缓缓轮转，灯火会准时亮起。</p>
+    </div>
+    <div id="build-panel" hidden><p class="build-intro">给小镇添一点你的心意。选择一件，再轻点空地。</p><div class="build-options"><button data-build="tree"><span class="build-emoji">🌳</span><b>一棵树</b><small>在风里慢慢长大</small></button><button data-build="flowers"><span class="build-emoji">🌷</span><b>一丛花</b><small>给路过的人好心情</small></button><button data-build="bench"><span class="build-emoji">🪑</span><b>长椅</b><small>让时间坐一会儿</small></button><button data-build="house"><span class="build-emoji">🏡</span><b>小屋</b><small>给新故事一个家</small></button><button data-build="pine"><span class="build-emoji">🌲</span><b>小松树</b><small>替你收集风的声音</small></button><button data-build="cherry"><span class="build-emoji">🌸</span><b>樱花树</b><small>把春天留在这里</small></button><button data-build="sunflowers"><span class="build-emoji">🌻</span><b>向日葵</b><small>每一张脸都朝着阳光</small></button><button data-build="birdhouse"><span class="build-emoji">🐦</span><b>小鸟木屋</b><small>给翅膀留一处歇脚</small></button></div><div class="build-footer"><span id="build-count">你的布置会自动保存</span><button id="undo-build" class="text-button">撤回上一步</button></div></div>
+    <div id="journal-panel" hidden><p class="build-intro" id="journal-intro">认识街坊，也认识住在草木间的小伙伴。轻点名字，去它身边。</p><div class="journal-tabs"><button data-journal="residents" class="selected">街坊邻居</button><button data-journal="animals">小动物</button><button data-journal="places">小镇角落</button></div><div id="journal-list" class="journal-list" aria-label="小镇邻里名册"></div><p class="panel-caption" id="journal-count"></p></div>
+  </section>
+  <section class="resident-card glass" id="resident-card" hidden aria-label="小镇故事"><button class="close-button" id="close-resident" aria-label="关闭">×</button><span class="eyebrow" id="resident-category">LITTLE TOWN STORIES</span><h2 id="resident-name">林间面包房</h2><p id="resident-description"></p><button id="interact-btn" class="interaction-button">和它打个招呼 <span>♡</span></button><button id="follow-btn" class="follow-button" hidden>跟着走一会儿 <span>↗</span></button></section>
+  <div class="placement-hint glass" id="placement-hint" hidden><span id="placement-text">轻点空地，种下一棵树</span><button id="cancel-placement">取消</button></div>
+  <footer class="bottom-bar">
+    <div class="town-status"><span class="live-dot"></span><div><span id="status-main">小镇正在好好生活</span><small id="status-sub">32 位居民 · 29 位动物伙伴 · 1 趟慢车</small></div></div>
+    <nav class="toolbar glass" aria-label="小镇工具"><button id="atmosphere-btn" class="tool-button" title="光阴与天气"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span>光阴天气</span></button><button id="build-btn" class="tool-button" title="布置小镇"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8M5 10v11h14V10M9 21v-7h6v7M19 3v4"/></svg><span>布置小镇</span></button><button id="journal-btn" class="tool-button" title="邻里手记"><svg viewBox="0 0 24 24"><path d="M3 4h6a4 4 0 0 1 3 2 4 4 0 0 1 3-2h6v16h-6a4 4 0 0 0-3 1 4 4 0 0 0-3-1H3ZM12 6v15M6 8h3m-3 4h3m6-4h3m-3 4h3"/></svg><span>邻里手记</span></button><div class="toolbar-divider"></div><button id="sound-btn" class="tool-button" aria-pressed="false" title="开启环境声音"><svg viewBox="0 0 24 24"><path d="m11 4-6 5H2v6h3l6 5ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-slash" d="m3 3 18 18"/></svg><span>环境声音</span></button><button id="photo-btn" class="tool-button" title="保存此刻"><svg viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"/><circle cx="12" cy="13" r="4"/></svg><span>保存此刻</span></button><button id="reset-view-btn" class="tool-button" title="回到全景"><svg viewBox="0 0 24 24"><path d="m3 9 9-6 9 6v10l-9 3-9-3ZM3 9l9 5 9-5M12 14v8"/></svg><span>回到全景</span></button></nav>
+    <div class="edition"><span>SLOWHAVEN</span><small>A pocket-sized kind of happiness.</small></div>
+  </footer>
+  <div class="toast glass" id="toast" role="status" hidden></div>
+  <div class="modal-backdrop" id="help-modal" hidden><section class="help-modal glass" role="dialog" aria-modal="true" aria-labelledby="help-title"><button class="close-button" id="close-help" aria-label="关闭">×</button><div class="eyebrow">WELCOME TO SLOWHAVEN</div><h2 id="help-title">在这里，慢一点也很好。</h2><p>这座小镇没有任务，也没有倒计时。<br>你可以看一会儿树，或等一班经过的火车。</p><div class="help-grid"><div><b>转一转</b><span>拖动旋转，滚轮缩放<br>右键拖动平移</span></div><div><b>认识小镇</b><span>点击建筑、居民或火车<br>听听他们的小故事</span></div><div><b>换个心情</b><span>拨动时间，等灯亮起<br>也可以让雨雪落下来</span></div><div><b>留一点心意</b><span>种树、栽花、添一间小屋<br>布置会保存在当前浏览器</span></div></div><button id="start-wandering" class="primary-button">去小镇走走 <span>↗</span></button><small>按空格暂停 · 按 H 隐藏界面 · 按 Esc 返回</small></section></div>
+  <div class="loading-screen" id="loading-screen"><div class="loading-house"><svg viewBox="0 0 64 64"><path d="M12 31 32 13l20 18v23H12Z"/><path d="m7 31 25-23 25 23M26 54V35h13v19"/></svg></div><h2>栖迟小镇</h2><p id="loading-text">正在为你点亮一扇窗…</p><span class="loading-line"></span></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

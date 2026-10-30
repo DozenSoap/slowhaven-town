@@ -1,0 +1,8 @@
+{
+  "name": "slowhaven-miniature-town",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": { "test": "node --test tests/*.test.mjs", "prepare:pages": "node scripts/prepare-pages.mjs" },
+  "dependencies": { "three": "0.180.0" }
+}

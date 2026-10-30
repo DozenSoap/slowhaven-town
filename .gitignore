@@ -1,0 +1,7 @@
+node_modules/
+.sites/
+*.log
+dist/__qa__/
+.openai/
+.env
+.env.*
