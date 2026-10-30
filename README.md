@@ -1,6 +1,6 @@
 # 栖迟小镇 · Slowhaven
 
-[在线游玩](https://slowhaven-bingguo-town.bingguo101.chatgpt.site/) · [私有源码仓库](https://github.com/DozenSoap/slowhaven-town)
+[在线游玩](https://dozensoap.github.io/slowhaven-town/) · [公开源码仓库](https://github.com/DozenSoap/slowhaven-town) · [原 Site 入口](https://slowhaven-bingguo-town.bingguo101.chatgpt.site/)
 
 一款浏览器本地运行的生活模拟游戏。默认进入可操控角色的生活模式；最初的观赏与布置模式保留在 `dist/diorama.html`。全部模型、纹理和环境音在本地生成，不依赖外部 CDN、AI 对话或在线存档服务。
 
@@ -67,11 +67,11 @@ npm test
 
 ## GitHub 源码与 Pages
 
-GitHub 私有源码仓库：https://github.com/DozenSoap/slowhaven-town 。
+GitHub 公开源码仓库：https://github.com/DozenSoap/slowhaven-town 。
 
-直接游玩与分享：https://slowhaven-bingguo-town.bingguo101.chatgpt.site/ 。每个访客的存档仍留在自己的浏览器。
+直接游玩与分享：https://dozensoap.github.io/slowhaven-town/ 。2026-10-30 经用户明确授权，本仓库改为 Public，并启用 GitHub Pages，从 `main` 分支的 `/docs` 目录部署，无需升级套餐。
 
-2026-10-30 已核验本仓库 Pages 设置：当前账号需升级套餐才能为私有仓库启用 Pages。源码保持 Private，在线游玩与分享使用 Site。
+原 Site 入口仍可使用：https://slowhaven-bingguo-town.bingguo101.chatgpt.site/ 。每个访客的存档只保存在自己的浏览器。两个网址属于不同来源，存档彼此独立；如需继续原 Site 上的人生，请先在原网址导出，再在新网址导入。
 
 本仓库首次导入的是 Site 第 7 版完整源码，来源提交 `f47d11e3681ff44ae93389ee685138d1a9b23e18`。包含 `dist/` 游戏、`docs/` 静态部署副本、测试和本地开发说明。
 
@@ -81,7 +81,7 @@ GitHub 私有源码仓库：https://github.com/DozenSoap/slowhaven-town 。
 npm run prepare:pages
 ```
 
-该命令从 `dist/` 生成 `docs/`，并排除临时测试页面。拥有私有仓库 Pages 功能的账号，可在仓库 Settings → Pages 选择部署分支的 `/docs` 目录。GitHub Free 的个人私有仓库不提供 Pages，不能因此把源码改为公开，也不自动升级套餐。
+该命令从 `dist/` 生成 `docs/`，并排除临时测试页面。Pages 设置为 Deploy from a branch → `main` → `/docs`；将更新同步到此分支后，GitHub 自动重新部署。其他已有仓库不在本项目的修改范围内。
 
 此目录已包含运行所需的本地模块与许可，不需要在线 AI、服务器或用户存档文件。后续更新先修改 `dist/`、检查，再重新生成 `docs/`。
 
