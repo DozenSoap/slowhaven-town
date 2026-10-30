@@ -1,5 +1,7 @@
 # 栖迟小镇 · Slowhaven
 
+[在线游玩](https://slowhaven-bingguo-town.bingguo101.chatgpt.site/) · [私有源码仓库](https://github.com/DozenSoap/slowhaven-town)
+
 一款浏览器本地运行的生活模拟游戏。默认进入可操控角色的生活模式；最初的观赏与布置模式保留在 `dist/diorama.html`。全部模型、纹理和环境音在本地生成，不依赖外部 CDN、AI 对话或在线存档服务。
 
 ## 手机与声音更新
@@ -68,6 +70,8 @@ npm test
 GitHub 私有源码仓库：https://github.com/DozenSoap/slowhaven-town 。
 
 直接游玩与分享：https://slowhaven-bingguo-town.bingguo101.chatgpt.site/ 。每个访客的存档仍留在自己的浏览器。
+
+2026-10-30 已核验本仓库 Pages 设置：当前账号需升级套餐才能为私有仓库启用 Pages。源码保持 Private，在线游玩与分享使用 Site。
 
 本仓库首次导入的是 Site 第 7 版完整源码，来源提交 `f47d11e3681ff44ae93389ee685138d1a9b23e18`。包含 `dist/` 游戏、`docs/` 静态部署副本、测试和本地开发说明。
 
