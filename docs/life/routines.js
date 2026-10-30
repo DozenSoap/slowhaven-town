@@ -11,7 +11,7 @@ const routes={
 const safePoints=new Map(),indoorRoutes=new Map();
 const minutes=s=>(s.day-1)*1440+s.minute+s.clockFraction;
 function safePoint(area,point,inside=null){const key=[area,inside,...point].join(':');if(!safePoints.has(key)){const p=nearestWalkable(area,...point,inside);if(!p)throw new Error('居民路线没有可行走的地点：'+key);safePoints.set(key,p);}return safePoints.get(key);}
-export function outdoorTarget(s,profile,area,offset=0){const route=routes[area];if(!route)throw new Error('未知的居民街区：'+area);const period=12+(profile.index*7)%13,slot=Math.floor((minutes(s)+profile.index*3.7+s.seed%17)/period)+profile.index+offset;return safePoint(area,route[((slot%route.length)+route.length)%route.length]);}
+export function outdoorTarget(s,profile,area,offset=0){const welcoming=area==='farm'&&s.day===1&&s.minute>=480&&s.minute<630&&profile.work==='greenhouse';const route=welcoming?[[-11,1],[-8,1],[-5,1],[-8,3]]:routes[area];if(!route)throw new Error('未知的居民街区：'+area);const period=12+(profile.index*7)%13,slot=Math.floor((minutes(s)+profile.index*3.7+s.seed%17)/period)+profile.index+offset;return safePoint(area,route[((slot%route.length)+route.length)%route.length]);}
 
 function indoorRoute(profile,inside){
   const key=inside+':'+profile.id;if(indoorRoutes.has(key))return indoorRoutes.get(key);

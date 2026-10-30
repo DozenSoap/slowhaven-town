@@ -1,4 +1,4 @@
-import {NPCS,ITEMS,QUESTS,building,calendar,pathBetweenAreas,IDENTITIES} from './content.js';
+import {NPCS,ITEMS,QUESTS,building,calendar,pathBetweenAreas,IDENTITIES,AREAS} from './content.js';
 import {findPath,moveAlong,nearestWalkable} from './navigation.js';
 import {outdoorTarget} from './routines.js';
 export const SCHEMA=2;
@@ -23,6 +23,15 @@ export function scheduleFor(s,n){
   if((s.day+n.index*3)%17===0&&h>=14&&h<17)return {place:'coast',task:'偶尔给自己放个假'};
   if(h<8)return {place:'bakery',task:'买一份早餐'};
   if(h>=12&&h<13)return {place:n.index%2?'market':'cafe',task:'午间休息'};
+  if(s.day===1&&h<10.5&&n.work==='greenhouse')return {place:'farm',task:'来农庄迎接新邻居'};
+  // Outdoor occupations keep their own hours, including weekends. A rainy town
+  // still has deliveries, while gardeners spend most of wet days in the greenhouse.
+  if(h<17&&n.work==='post')return {place:h<10.5?'farm':h<12?'civic':'center',task:'沿街投递信件'};
+  if(h<17&&n.work==='greenhouse'){
+    const sheltered=s.weather==='rain'||s.weather==='snow',indoors=sheltered||Math.floor((s.minute+n.index*17)/60)%3===0;
+    return {place:indoors?'greenhouse':'farm',task:indoors?'照料温室里的植物':n.role==='果农'?'照看果树和菜地':'修剪农庄的花草'};
+  }
+  if(h<17&&n.work==='cabin')return {place:s.weather==='snow'?'cabin':'woods',task:s.weather==='snow'?'在护林小屋整理物资':'沿林间小路巡护'};
   const retired=n.baseAge>=65;
   if((!weekend||['hospital','station','bakery','cafe','market'].includes(n.work))&&!retired&&h<17&&(n.baseAge>=18||h<15))return {place:n.work,task:n.baseAge<18?'在学校上课':n.role.includes('老师')?'在学园教课':n.role.includes('医生')||n.role.includes('护士')?'照顾来诊的居民':'在'+building(n.work).name+'工作'};
   if(s.weather==='rain'||s.weather==='snow')return {place:n.index%3?'books':'cafe',task:s.weather==='snow'?'在屋里躲一会儿雪':'在屋檐下等雨停'};
@@ -34,13 +43,27 @@ function initializeNPCs(s){
   for(const npc of s.npcs){const profile=NPCS.find(n=>n.id===npc.id),goal=scheduleFor(s,profile),b=building(goal.place),area=b?.area??goal.place,point=b?.door??outdoorTarget(s,profile,area,-1);Object.assign(npc,{area,x:point[0],z:point[1],inside:b?.id??null,task:goal.task,target:goal.place,path:[],transit:null});}
   updateNPCs(s,0);
 }
+// Apply current routes to schema-2 lives without resetting their people,
+// relationships, time or inventory. Legacy abstract transits resume at the
+// resident's saved outdoor position and continue through physical district gates.
+export function synchronizeResidents(s){updateNPCs(s,0);}
 function updateNPCs(s,dt){
-  for(const npc of s.npcs){const n=NPCS.find(n=>n.id===npc.id),goal=scheduleFor(s,n),b=building(goal.place),area=b?.area??goal.place,point=b?.door??outdoorTarget(s,n,area);npc.task=goal.task;
-    if(npc.target!==goal.place){npc.target=goal.place;npc.inside=null;npc.path=[];if(npc.area!==area){npc.transit={area,place:goal.place,remaining:8+pathBetweenAreas(npc.area,area).length*12};}else{npc.transit=null;npc.path=findPath(area,[npc.x,npc.z],point);}}
-    if(npc.transit){npc.transit.remaining=Math.max(0,npc.transit.remaining-dt);if(npc.transit.remaining===0){npc.area=area;const p=b?.door??outdoorTarget(s,n,area,-1);npc.x=p[0];npc.z=p[1];npc.transit=null;npc.inside=b?.id??null;npc.path=[];}continue;}
-    if(npc.area!==area||npc.inside)continue;
-    if(!b){const end=npc.path.at(-1);if((!end||Math.hypot(end[0]-point[0],end[1]-point[1])>.1)&&Math.hypot(npc.x-point[0],npc.z-point[1])>.1)npc.path=findPath(area,[npc.x,npc.z],point);}
-    if(npc.path.length)moveAlong(npc,npc.path,dt*(n.baseAge>=65?.82:n.baseAge<18?1.45:1.18));
+  for(const npc of s.npcs){const n=NPCS.find(n=>n.id===npc.id),goal=scheduleFor(s,n),b=building(goal.place),area=b?.area??goal.place; npc.task=goal.task;
+    if(npc.transit){npc.transit=null;npc.path=[];}
+    if(npc.target!==goal.place){npc.target=goal.place;npc.inside=null;npc.path=[];}
+    const speed=n.baseAge>=65?.82:n.baseAge<18?1.45:1.18;
+    if(npc.area!==area){
+      npc.inside=null;const gate=pathBetweenAreas(npc.area,area)[0];if(!gate)throw new Error('居民无法到达街区：'+npc.id+' → '+area);
+      const end=npc.path.at(-1);if(!end||Math.hypot(end[0]-gate.x,end[1]-gate.z)>.1)npc.path=findPath(npc.area,[npc.x,npc.z],[gate.x,gate.z]);
+      npc.task='前往'+AREAS[area].name+' · '+goal.task;
+      if(npc.path.length)moveAlong(npc,npc.path,dt*speed);
+      if(!npc.path.length&&Math.hypot(npc.x-gate.x,npc.z-gate.z)<.25){npc.area=gate.to;[npc.x,npc.z]=gate.spawn;}
+      continue;
+    }
+    if(npc.inside)continue;
+    const point=b?.door??outdoorTarget(s,n,area),end=npc.path.at(-1);
+    if((!end||Math.hypot(end[0]-point[0],end[1]-point[1])>.1)&&Math.hypot(npc.x-point[0],npc.z-point[1])>.1)npc.path=findPath(area,[npc.x,npc.z],point);
+    if(npc.path.length)moveAlong(npc,npc.path,dt*speed);
     if(b&&!npc.path.length&&Math.hypot(npc.x-point[0],npc.z-point[1])<2)npc.inside=b.id;
   }
 }
